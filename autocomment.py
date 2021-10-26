@@ -41,7 +41,7 @@ listStrings = ["Cole. His name was Cole. And he had just turned 6 at the time of
 #listStrings = ["I won the giveaway", "Hi there"]
 
 def logShit(text):
-	with open('botbeaterlogs.txt', 'w') as f:
+	with open('autocomment_logs.txt', 'w') as f:
 		f.write(text)
 
 def unixToDate(value):
