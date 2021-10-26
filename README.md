@@ -11,3 +11,4 @@ It can also detect post frequency automatically if the target account has a fixe
 
 Edit the .py file with your settings and install requirements.txt in order to complete the setup
 
+Comment logs are saved to autocomment_logs.txt
