@@ -1,3 +1,5 @@
+# IG Auto Comment
+
 **This bot will allow you to be the first comment when a post is uploaded to Instagram**
 
 Useful when accounts give away a reward for being the first comment, such as money or a shotout
