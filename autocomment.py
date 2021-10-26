@@ -1,15 +1,17 @@
-﻿# -- coding: UTF-8 --
+# -- coding: UTF-8 --
 import os
 import shutil # shell utilities
-import colorama #https://pypi.org/project/colorama/
 import time
 import argparse
 import requests
 import json
 import datetime
 from random import randrange
-from colorama import Fore, Style
+from colorama import Fore, Style, Back, init
 from InstagramAPI import InstagramAPI #https://github.com/LevPasha/Instagram-API-python
+
+init(convert=True)
+init(autoreset=True)
 
 defaultAccount = ""	# Account the bot targets when there is no value given
 username = ""		# Your IG account username
@@ -70,23 +72,24 @@ def clear():
 
 clear()
 
-cuenta = input("\n\n\n> Enter the name of the account (default: @"+defaultAccount+"): ")
+print(Back.CYAN + "\n\n\nInstagram Auto Comment loaded!")
+cuenta = input("\n\n> Enter the name of the account (default: @"+defaultAccount+"): ")
 if not cuenta:
 	cuenta = defaultAccount
-print(Fore.MAGENTA + "\n> Selected account "+cuenta)
+print(Fore.BLUE + "Selected account "+cuenta)
 
-autoCalculate = input("Should we automatically calculate the post upload frequency? (y/N)")
+autoCalculate = input("\n> Should we automatically calculate the post upload frequency? (y/N)")
 if str(autoCalculate) == "y":
 	useAuto = True
-	print(Fore.RESET + "\nAutomatic mode [ON]")
+	print("Automatic mode [ON]")
 else:
 	useAuto = False
-	print(Fore.GREEN + "\nAutomatic mode [OFF]")
+	print("Automatic mode [OFF]")
 
 # Log into IG
 insta = InstagramAPI(username, password)
 try:
-	print(Fore.MAGENTA + "\n> Logging into IG: "+username+"\n")
+	print(Fore.BLUE + "\nLogging into IG: "+username+"\n")
 	insta.login()
 except:
 	print(Fore.RED + "[ERR] Instagram Login has failed.")
