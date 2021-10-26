@@ -13,7 +13,7 @@ from InstagramAPI import InstagramAPI #https://github.com/LevPasha/Instagram-API
 init(convert=True)
 init(autoreset=True)
 
-defaultAccount = ""	# Account the bot targets when there is no value given
+defaultAccount = "barackobama"	# Account the bot targets when there is no value given
 username = ""		# Your IG account username
 password = ""		# Your IG account password
 maxTriesInSeconds = 20		# Stop sending requests in seconds after the post should have been uploaded
@@ -70,107 +70,109 @@ def getPostDate(insta, usuario, username_id, postnumb):
 def clear():
 	os.system('cls' if os.name == 'nt' else 'clear')
 
-clear()
+def main():
+	clear()
 
-print(Back.CYAN + "\n\n\nInstagram Auto Comment loaded!")
-cuenta = input("\n\n> Enter the name of the account (default: @"+defaultAccount+"): ")
-if not cuenta:
-	cuenta = defaultAccount
-print(Fore.BLUE + "Selected account "+cuenta)
+	print(Back.CYAN + "\n\n\nInstagram Auto Comment loaded!")
+	cuenta = input("\n\n> Enter the name of the account (default: @"+defaultAccount+"): ")
+	if not cuenta:
+		cuenta = defaultAccount
+	print(Fore.BLUE + "Selected account "+cuenta)
 
-autoCalculate = input("\n> Should we automatically calculate the post upload frequency? (y/N)")
-if str(autoCalculate) == "y":
-	useAuto = True
-	print("Automatic mode [ON]")
-else:
-	useAuto = False
-	print("Automatic mode [OFF]")
+	autoCalculate = input("\n> Should we automatically calculate the post upload frequency? (y/N)")
+	if str(autoCalculate) == "y":
+		useAuto = True
+		print("Automatic mode [ON]")
+	else:
+		useAuto = False
+		print("Automatic mode [OFF]")
 
-# Log into IG
-insta = InstagramAPI(username, password)
-try:
-	print(Fore.BLUE + "\nLogging into IG: "+username+"\n")
-	insta.login()
-except:
-	print(Fore.RED + "[ERR] Instagram Login has failed.")
-time.sleep(2)
+	# Log into IG
+	insta = InstagramAPI(username, password)
+	try:
+		print(Fore.BLUE + "\nLogging into IG: "+username+"\n")
+		insta.login()
+	except:
+		print(Fore.RED + "[ERR] Instagram Login has failed.")
+	time.sleep(2)
 
-clear()
+	clear()
 
-InstagramAPI.searchUsername(insta, cuenta)
-info = insta.LastJson
-username_id = info['user']['pk']
+	InstagramAPI.searchUsername(insta, cuenta)
+	info = insta.LastJson
+	username_id = info['user']['pk']
 
-theonebefore = getIDLastPost(insta, cuenta, username_id)	# Get last post ID
-if not useAuto:
-	selectedComment = listStrings[randrange(0, len(listStrings))]
-	lastPost = time.time()
-	delaynum = 5
-	print("\n\n")
-	delaynum = input("Type the delay between each check (IG can ban you if it's too small): ")
-	print("\n\n")
-	while True:
-		if lastPost+int(delaynum) <= time.time():
-				lastPost = time.time()
-				lastmediaid = getIDLastPost(insta, cuenta, username_id)
-				if str(lastmediaid) == theonebefore:	# If no new post is uploaded
-					print(Fore.RED + "[ERR] No new posts.")
-				else:
-					comment(insta, lastmediaid, selectedComment)
-					print(Fore.YELLOW + "> New post detected, new media ID: "+str(lastmediaid))
-					print(Fore.GREEN + "> Commented on "+str(lastmediaid))
-					theonebefore = lastmediaid
+	theonebefore = getIDLastPost(insta, cuenta, username_id)	# Get last post ID
+	if not useAuto:
+		selectedComment = listStrings[randrange(0, len(listStrings))]
+		lastPost = time.time()
+		delaynum = 5
+		print("\n\n")
+		delaynum = input("Type the delay between each check (IG can ban you if it's too small): ")
+		print("\n\n")
+		while True:
+			if lastPost+int(delaynum) <= time.time():
+					lastPost = time.time()
+					lastmediaid = getIDLastPost(insta, cuenta, username_id)
+					if str(lastmediaid) == theonebefore:	# If no new post is uploaded
+						print(Fore.RED + "[ERR] No new posts.")
+					else:
+						comment(insta, lastmediaid, selectedComment)
+						print(Fore.YELLOW + "> New post detected, new media ID: "+str(lastmediaid))
+						print(Fore.GREEN + "> Commented on "+str(lastmediaid))
+						theonebefore = lastmediaid
 
-else:
-	unix1 = getPostDate(insta, cuenta, username_id, 0)
-	unix2 = getPostDate(insta, cuenta, username_id, 1)
-	delaybetweenposts = unix1 - unix2
-	lasttimesincelastpost = time.time()
-	attemptingToPost = False
+	else:
+		unix1 = getPostDate(insta, cuenta, username_id, 0)
+		unix2 = getPostDate(insta, cuenta, username_id, 1)
+		delaybetweenposts = unix1 - unix2
+		lasttimesincelastpost = time.time()
+		attemptingToPost = False
 
-	selectedComment = listStrings[randrange(0, len(listStrings))]
+		selectedComment = listStrings[randrange(0, len(listStrings))]
 
 
-	while True:
-		ourtime = time.time()
-		timesincelastpost = ourtime - unix1
-		if lasttimesincelastpost+1 <= ourtime and not attemptingToPost:
-			clear()
-			print(Fore.CYAN + "\n\n> Time since last post: "+Fore.GREEN+str(round(timesincelastpost)))
-			print(Fore.CYAN + "> Current delay between posts: "+Fore.GREEN+str(delaybetweenposts))
-			print(Fore.CYAN + "> Current account selected: "+Fore.GREEN+"@"+str(cuenta))
-			print(Fore.CYAN + "> Current selected comment: "+Fore.GREEN+str(selectedComment)+"\n")
-			lasttimesincelastpost = ourtime
-		if timesincelastpost+startrequests >= delaybetweenposts:
-			try:
-				attemptingToPost = True
-				if delaybetweenposts+maxTriesInSeconds <= timesincelastpost:
-					print(Fore.RED + "[ERR] Couldn't find a specific upload pattern, retrying in 15 seconds...")
-					unix1 = getPostDate(insta, cuenta, username_id, 0)
-					unix2 = getPostDate(insta, cuenta, username_id, 1)
-					delaybetweenposts = unix1 - unix2
-					print(Fore.RESET + "> Current delay calculated between posts: "+str(delaybetweenposts))
-					time.sleep(15)
-					attemptingToPost = False
-					continue
-				lastmediaid = getIDLastPost(insta, cuenta, username_id)
-				if str(lastmediaid) == theonebefore:	# If no new post is uploaded
-					print(Fore.RED + "[ERR] No new posts.")
-					continue
-				else:
-					print(Fore.YELLOW + "> New post detected, new media ID: "+str(lastmediaid))
-					comment(insta, lastmediaid, selectedComment)
-					print(Fore.GREEN + "> Commented on "+str(lastmediaid))
-					unix1 = getPostDate(insta, cuenta, username_id, 0)
-					unix2 = getPostDate(insta, cuenta, username_id, 1)
-					timetaken = time.time()-unix1
-					delaybetweenposts = unix1 - unix2
-					logShit(str(unixToDate(time.time()))+" -> Commented on the account: "+str(cuenta)+" with media ID: "+str(lastmediaid)+". Took "+str(timetaken)+" seconds.")
-					theonebefore = lastmediaid
-					time.sleep(5)
-					attemptingToPost = False
-					selectedComment = listStrings[randrange(0, len(listStrings))]
-					continue
-			except Exception as e:
-				print(Fore.RED + "[ERR] Error requesting the last post's ID.")
-				print(e)
+		while True:
+			ourtime = time.time()
+			timesincelastpost = ourtime - unix1
+			if lasttimesincelastpost+1 <= ourtime and not attemptingToPost:
+				clear()
+				print(Fore.CYAN + "\n\n> Time since last post: "+Fore.GREEN+str(round(timesincelastpost)))
+				print(Fore.CYAN + "> Current delay between posts: "+Fore.GREEN+str(delaybetweenposts))
+				print(Fore.CYAN + "> Current account selected: "+Fore.GREEN+"@"+str(cuenta))
+				print(Fore.CYAN + "> Current selected comment: "+Fore.GREEN+str(selectedComment)+"\n")
+				lasttimesincelastpost = ourtime
+			if timesincelastpost+startrequests >= delaybetweenposts:
+				try:
+					attemptingToPost = True
+					if delaybetweenposts+maxTriesInSeconds <= timesincelastpost:
+						unix1 = getPostDate(insta, cuenta, username_id, 0)
+						unix2 = getPostDate(insta, cuenta, username_id, 1)
+						delaybetweenposts = unix1 - unix2
+						print(Fore.YELLOW + "> Current delay calculated between posts does not follow a pattern ("+str(delaybetweenposts)+"s), cannot continue")
+						attemptingToPost = False
+						time.sleep(15)
+						continue
+					lastmediaid = getIDLastPost(insta, cuenta, username_id)
+					if str(lastmediaid) == theonebefore:	# If no new post is uploaded
+						print(Fore.RED + "[ERR] No new posts.")
+						continue
+					else:
+						print(Fore.YELLOW + "> New post detected, new media ID: "+str(lastmediaid))
+						comment(insta, lastmediaid, selectedComment)
+						print(Fore.GREEN + "> Commented on "+str(lastmediaid))
+						unix1 = getPostDate(insta, cuenta, username_id, 0)
+						unix2 = getPostDate(insta, cuenta, username_id, 1)
+						timetaken = time.time()-unix1
+						delaybetweenposts = unix1 - unix2
+						logShit(str(unixToDate(time.time()))+" -> Commented on the account: "+str(cuenta)+" with media ID: "+str(lastmediaid)+". Took "+str(timetaken)+" seconds.")
+						theonebefore = lastmediaid
+						time.sleep(5)
+						attemptingToPost = False
+						selectedComment = listStrings[randrange(0, len(listStrings))]
+						continue
+				except Exception as e:
+					print(Fore.RED + "[ERR] Error requesting the last post's ID.")
+					print(e)
+
+main()
